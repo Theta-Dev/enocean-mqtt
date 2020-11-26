@@ -3,20 +3,19 @@
 # Author: Roman Morawek <roman.morawek@embyt.com>
 """this is the main entry point, which sets up the Communicator class"""
 import logging
-import sys
 import os
 import traceback
-import copy
 import argparse
-from configparser import ConfigParser
 
 from enoceanmqtt.communicator import Communicator
+from enoceanmqtt.config import SensorConfig
 
 conf = {
     'debug': False,
     'config': ['/etc/enoceanmqtt.conf'],
     'logfile': os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'enoceanmqtt.log')
 }
+
 
 def parse_args():
     """ Parse command line arguments. """
@@ -30,46 +29,6 @@ def parse_args():
     args = vars(parser.parse_args())
     # logging.info('Read arguments: ' + str(args))
     return args
-
-
-def load_config_file(config_files):
-    # extract sensor configuration
-    sensors = []
-    global_config = {}
-
-    for conf_file in config_files:
-        conf = ConfigParser(inline_comment_prefixes=('#', ';'))
-        if not os.path.isfile(conf_file):
-            logging.warning("Config file {} does not exist, skipping".format(conf_file))
-            continue
-        logging.info("Loading config file {}".format(conf_file))
-        if not conf.read(conf_file):
-            logging.error("Cannot read config file: {}".format(conf_file))
-            sys.exit(1)
-
-        for section in conf.sections():
-            if section == 'CONFIG':
-                # general configuration is part of CONFIG section
-                for key in conf[section]:
-                    global_config[key] = conf[section][key]
-            else:
-                mqtt_prefix = conf['CONFIG']['mqtt_prefix'] \
-                    if 'mqtt_prefix' in conf['CONFIG'] else "enocean/"
-                new_sens = {'name': mqtt_prefix + section}
-                for key in conf[section]:
-                    try:
-                        new_sens[key] = int(conf[section][key], 0)
-                    except KeyError:
-                        new_sens[key] = None
-                sensors.append(new_sens)
-                logging.debug("Created sensor: {}".format(new_sens))
-
-    logging_global_config = copy.deepcopy(global_config)
-    if "mqtt_pwd" in logging_global_config:
-        logging_global_config["mqtt_pwd"] = "*****"
-    logging.debug("Global config: {}".format(logging_global_config))
-
-    return sensors, global_config
 
 
 def setup_logging(log_filename='', log_file_level=logging.INFO, debug=False):
@@ -93,6 +52,7 @@ def setup_logging(log_filename='', log_file_level=logging.INFO, debug=False):
     if debug:
         logging.info("Logging debug to console")
 
+
 def main():
     """entry point if called as an executable"""
     # logging.getLogger().setLevel(logging.DEBUG)
@@ -103,17 +63,20 @@ def main():
     setup_logging(conf['logfile'], debug=conf['debug'])
 
     # load config file
-    sensors, global_config = load_config_file(conf['config'])
-    conf.update(global_config)
+    if len(conf['config']) > 1:
+        logging.warning("Multiple config files set, using {}".format(conf['config'][-1]))
+
+    config = SensorConfig(conf['config'][-1])
 
     # start working
-    com = Communicator(conf, sensors)
+    com = Communicator(config)
     try:
         com.run()
 
     # catch all possible exceptions
     except:     # pylint: disable=broad-except
         logging.error(traceback.format_exc())
+
 
 # check for execution
 if __name__ == "__main__":

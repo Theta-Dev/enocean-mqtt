@@ -41,6 +41,9 @@ mqtt_prefix     = enocean/
 ## Enable MQTT debugging. Requires --debug on the command line.
 # mqtt_debug      = true
 
+## Automatically add unknown devices
+learnmode = false
+
 ## all other sections define the sensors to monitor
 
 [switch]

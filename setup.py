@@ -5,10 +5,8 @@
 import setuptools
 
 # needed packages
-REQUIRES = [
-    'enocean',
-    'paho-mqtt',
-]
+with open('requirements.txt') as f:
+    REQUIRES = f.read().splitlines()
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
