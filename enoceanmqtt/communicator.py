@@ -133,6 +133,8 @@ class Communicator:
 				if not packet.learn or str(cur_sensor.get('log_learn')) in ("True", "true", "1"):
 					# data packet received
 					found_property = False
+					retain = str(self.conf.get('mqtt_ssl')) in ("True", "true", "1")
+
 					if packet.packet_type == PACKET.RADIO and packet.rorg == cur_sensor['rorg']:
 						# radio packet of proper rorg type received; parse EEP
 						direction = cur_sensor.get('direction')
@@ -150,7 +152,6 @@ class Communicator:
 							logging.debug(
 								"{}: {} ({})={} {}".format(cur_sensor['name'], prop_name, cur_prop['description'],
 														   cur_prop['value'], cur_prop['unit']))
-							retain = str(cur_sensor.get('persistent')) in ("True", "true", "1")
 							if mqtt_publish_json:
 								mqtt_json[prop_name] = value
 							else:
@@ -224,7 +225,8 @@ class Communicator:
 			sender_i = enocean.utils.combine_hex(packet.sender)
 			name = '0x' + hex(sender_i)[2:].rjust(8, '0')
 			logging.info('unknown sensor: {}'.format(name))
-			if self.conf['learnmode']:
+
+			if str(self.conf.get('learnmode')) in ("True", "true", "1"):
 				logging.info('adding new sensor {} to config file'.format(name))
 				if packet.rorg == RORG.BS1:
 					packet.select_eep(0x00, 0x01)
