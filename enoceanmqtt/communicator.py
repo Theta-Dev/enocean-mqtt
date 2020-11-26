@@ -135,7 +135,7 @@ class Communicator:
 				if not packet.learn or str(cur_sensor.get('log_learn')) in ("True", "true", "1"):
 					# data packet received
 					found_property = False
-					retain = str(self.conf.get('mqtt_ssl')) in ("True", "true", "1")
+					retain = str(self.conf.get('retain')) in ("True", "true", "1")
 
 					if packet.packet_type == PACKET.RADIO and packet.rorg == cur_sensor['rorg']:
 						# radio packet of proper rorg type received; parse EEP
