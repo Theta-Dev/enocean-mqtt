@@ -85,7 +85,9 @@ class Communicator:
 			for cur_sensor in self.config.get_sensors():
 				self.topics.append((cur_sensor['name'] + '/req/#', 0))
 
-			mqtt_client.subscribe(self.topics)
+			# Dont subscribe to empty list of topics
+			if self.topics:
+				mqtt_client.subscribe(self.topics)
 		else:
 			logging.error("Error connecting to MQTT broker: %s", self.CONNECTION_RETURN_CODE[rc])
 
