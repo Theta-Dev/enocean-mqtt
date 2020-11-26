@@ -7,7 +7,7 @@ class SensorConfig:
 
 	def __init__(self, file_path):
 		self.file_path = file_path
-		self.sensors = []
+		self.sensors = None
 		self.confp = ConfigParser(inline_comment_prefixes=('#', ';'))
 		if not os.path.isfile(file_path):
 			logging.error("Failed to load config: '{}' is not a file".format(file_path))
