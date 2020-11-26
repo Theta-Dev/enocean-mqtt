@@ -228,7 +228,7 @@ class Communicator:
 				logging.info('adding new sensor {} to config file'.format(name))
 				if packet.rorg == RORG.BS1:
 					packet.select_eep(0x00, 0x01)
-				self.config.addSensor_(name, packet.rorg, packet.rorg_func, packet.rorg_type, True)
+				self.config.add_sensor_(name, packet.rorg, packet.rorg_func, packet.rorg_type, True)
 				self.topics.append((name + '/req/#', 0))
 				self.mqtt.subscribe(name + '/req/#')
 			return

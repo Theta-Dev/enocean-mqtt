@@ -15,7 +15,7 @@ class SensorConfig:
 			logging.error("Failed to load conig: couldn't parse '{}'".format(file_path))
 		self.file_lastm = os.stat(file_path).st_mtime
 
-	def __add_sensor(self, address, rorg, func, type_, publish_rssi):
+	def add_sensor_(self, address, rorg, func, type_, publish_rssi):
 		if address == 'CONFIG':
 			logging.warning("Tried to add Sensor CONFIG")
 			return
@@ -38,7 +38,7 @@ class SensorConfig:
 
 	def add_sensor(self, address, eep, publish_rssi=True):
 		eep = eep.split('-')
-		self.__add_sensor(address, int(eep[0], 16), int(eep[1], 16), int(eep[2], 16), publish_rssi)
+		self.add_sensor_(address, int(eep[0], 16), int(eep[1], 16), int(eep[2], 16), publish_rssi)
 
 	def print_sections(self):
 		for section in (self.confp.sections()):
