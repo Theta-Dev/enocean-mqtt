@@ -157,14 +157,14 @@ class Communicator:
 							if mqtt_publish_json:
 								mqtt_json[prop_name] = value
 							else:
-								self.mqtt.publish(cur_sensor['name'] + "/" + prop_name, value, retain=retain)
+								self.mqtt.publish(cur_sensor['name'] + "/" + prop_name, value, qos=1, retain=retain)
 					if not found_property:
 						logging.warning('message not interpretable: {}'.format(cur_sensor['name']))
 					elif mqtt_publish_json:
 						name = cur_sensor['name']
 						value = json.dumps(mqtt_json)
 						logging.debug("{}: Sent MQTT: {}".format(name, value))
-						self.mqtt.publish(name, value, retain=retain)
+						self.mqtt.publish(name, value, qos=1, retain=retain)
 				else:
 					# learn request received
 					logging.info("learn request not emitted to mqtt")
