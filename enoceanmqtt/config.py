@@ -22,6 +22,8 @@ class SensorConfig:
 		if address in self.confp.sections():
 			logging.warning("Tried to add Sensor {} which already exists".format(address))
 			return
+		logging.info("Adding Sensor " + address)
+		logging.info("rorg: " + rorg + "; func: " + func + "; type: " + type_)
 
 		publish_rssi = 1 if publish_rssi else 0
 		self.confp[address] = {
