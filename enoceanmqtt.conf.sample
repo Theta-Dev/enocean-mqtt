@@ -44,6 +44,10 @@ mqtt_prefix     = enocean/
 ## Automatically add unknown devices
 learnmode = false
 
+## MOTT retain and QOS
+retain = true
+qos = 1
+
 ## all other sections define the sensors to monitor
 
 [switch]

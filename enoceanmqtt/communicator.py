@@ -122,6 +122,10 @@ class Communicator:
 		mqtt_publish_json = True if 'mqtt_publish_json' in self.conf and self.conf[
 			'mqtt_publish_json'] == "True" else False
 		mqtt_json = {}
+
+		retain = str(self.conf.get('retain')) in ("True", "true", "1")
+		qos = int(self.conf.get('qos'))
+
 		# loop through all configured devices
 		for cur_sensor in self.config.get_sensors():
 			# does this sensor match?
@@ -131,11 +135,10 @@ class Communicator:
 					if mqtt_publish_json:
 						mqtt_json['RSSI'] = packet.dBm
 					else:
-						self.mqtt.publish(cur_sensor['name'] + "/RSSI", packet.dBm)
+						self.mqtt.publish(cur_sensor['name'] + "/RSSI", packet.dBm, qos=qos, retain=retain)
 				if not packet.learn or str(cur_sensor.get('log_learn')) in ("True", "true", "1"):
 					# data packet received
 					found_property = False
-					retain = str(self.conf.get('retain')) in ("True", "true", "1")
 
 					if packet.packet_type == PACKET.RADIO and packet.rorg == cur_sensor['rorg']:
 						# radio packet of proper rorg type received; parse EEP
@@ -157,14 +160,14 @@ class Communicator:
 							if mqtt_publish_json:
 								mqtt_json[prop_name] = value
 							else:
-								self.mqtt.publish(cur_sensor['name'] + "/" + prop_name, value, qos=1, retain=retain)
+								self.mqtt.publish(cur_sensor['name'] + "/" + prop_name, value, qos=qos, retain=retain)
 					if not found_property:
 						logging.warning('message not interpretable: {}'.format(cur_sensor['name']))
 					elif mqtt_publish_json:
 						name = cur_sensor['name']
 						value = json.dumps(mqtt_json)
 						logging.debug("{}: Sent MQTT: {}".format(name, value))
-						self.mqtt.publish(name, value, qos=1, retain=retain)
+						self.mqtt.publish(name, value, qos=qos, retain=retain)
 				else:
 					# learn request received
 					logging.info("learn request not emitted to mqtt")
@@ -222,13 +225,13 @@ class Communicator:
 		if str(self.conf.get('log_packets')) in ("True", "true", "1"):
 			logging.info('received: {}'.format(packet))
 
-		# if sensor not found: add sensor if in learning mode, otherwise abort
+		# if sensor not found: add sensor if in learning mode and learning package, otherwise abort
 		if not found_sensor:
 			sender_i = enocean.utils.combine_hex(packet.sender)
 			name = '0x' + hex(sender_i)[2:].rjust(8, '0')
 			logging.info('unknown sensor: {}'.format(name))
 
-			if str(self.conf.get('learnmode')) in ("True", "true", "1"):
+			if str(self.conf.get('learnmode')) in ("True", "true", "1") and packet.learn:
 				logging.info('adding new sensor {} to config file'.format(name))
 				if packet.rorg == RORG.BS1:
 					packet.select_eep(0x00, 0x01)
