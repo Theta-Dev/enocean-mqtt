@@ -27,7 +27,7 @@ class SensorConfig:
 
 		publish_rssi = 1 if publish_rssi else 0
 		self.confp[address] = {
-			'address': int(address, base=16), 'rorg': str(rorg), 'func': str(func), 'type': str(type_), 'publish_rssi': publish_rssi
+			'address': int(address, base=16), 'rorg': rorg, 'func': func, 'type': type_, 'publish_rssi': publish_rssi
 		}
 		new_sens = {'name': self.confp['CONFIG']['mqtt_prefix'] + address}
 		for key in self.confp[address]:
